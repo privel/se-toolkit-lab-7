@@ -5,6 +5,7 @@ Usage:
     uv run bot.py --test "/start"     # Test mode (no Telegram connection)
     uv run bot.py --test "question"   # Test mode with plain text (LLM routing)
     uv run bot.py                     # Production mode (connects to Telegram)
+
 """
 
 import argparse
