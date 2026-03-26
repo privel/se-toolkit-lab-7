@@ -11,6 +11,7 @@ import httpx
 
 from config import load_config
 from services import LMSClient
+from handlers.intent_router import route as route_intent
 
 
 def handle_start() -> str:

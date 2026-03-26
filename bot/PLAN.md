@@ -46,11 +46,80 @@ This document describes the implementation plan for the LMS Telegram Bot across 
 
 **Deliverables:**
 
-- `bot/services/llm_client.py` — LLM client for intent recognition
-- `bot/handlers/intent_router.py` — Route user messages to handlers based on intent
-- Tool descriptions for LLM to understand available commands
+- `bot/services/llm_client.py` — LLM client for intent recognition and tool calling
+- `bot/services/tools.py` — Definitions for all 9 backend endpoints as LLM tools
+- `bot/handlers/intent_router.py` — Route user messages through LLM with tool calling loop
+- `bot/handlers/keyboard.py` — Inline keyboard buttons for common actions
 
-**Pattern:** LLM tool use — the LLM reads tool descriptions to decide which handler to call. Description quality matters more than prompt engineering.
+**Pattern:** LLM tool use — the LLM reads tool descriptions to decide which API calls to make. Description quality matters more than prompt engineering.
+
+**Implementation Details:**
+
+1. **Tool Definitions (`services/tools.py`):**
+   - `get_items` — List of all labs and tasks
+   - `get_learners` — Enrolled students and groups
+   - `get_scores` — Score distribution for a lab
+   - `get_pass_rates` — Per-task pass rates
+   - `get_timeline` — Submissions per day
+   - `get_groups` — Per-group scores
+   - `get_top_learners` — Top N learners
+   - `get_completion_rate` — Completion percentage
+   - `trigger_sync` — Refresh data from autochecker
+
+2. **LLM Client (`services/llm_client.py`):**
+   - Wraps OpenAI-compatible chat completions API
+   - Sends tool definitions with messages
+   - Extracts tool calls from responses
+   - Supports multi-turn conversation with tool results
+
+3. **Intent Router (`handlers/intent_router.py`):**
+   - Receives plain text message from user
+   - Sends to LLM with tool definitions
+   - Executes tool calls against backend
+   - Feeds results back to LLM
+   - Returns final summarized answer
+   - Maximum 5 iterations to prevent loops
+
+4. **Inline Keyboards (`handlers/keyboard.py`):**
+   - `/start` keyboard: Labs, Health, Scores, Top Students, Help
+   - `/help` keyboard: Additional buttons for Pass Rates, Groups
+   - Dynamic lab buttons from backend data
+
+**Tool Calling Loop:**
+
+```
+User: "which lab has the lowest pass rate?"
+  → LLM receives message + 9 tool definitions
+  → LLM calls: get_items()
+  → Bot executes get_items(), returns 44 items
+  → LLM sees result, calls: get_pass_rates(lab="lab-01"), get_pass_rates(lab="lab-02"), ...
+  → Bot executes each call, returns results
+  → LLM analyzes all pass rates, returns: "Lab 02 has the lowest pass rate at 58.1%"
+  → Bot sends final answer to user
+```
+
+**Test Mode Usage:**
+
+```bash
+# Single-step queries
+uv run bot.py --test "what labs are available"
+uv run bot.py --test "show me scores for lab 4"
+
+# Multi-step queries (require tool calling loop)
+uv run bot.py --test "which lab has the lowest pass rate"
+uv run bot.py --test "which group is best in lab 3"
+
+# Fallback cases
+uv run bot.py --test "hello"        # Greeting
+uv run bot.py --test "asdfgh"       # Gibberish → helpful response
+```
+
+**Debug Output:**
+Debug messages are printed to stderr during `--test` mode:
+
+- `[loop]` — Iteration count
+- `[tool]` — Tool calls and results
+- `[response]` — Final LLM response
 
 ## Task 4: Containerize and Document
 

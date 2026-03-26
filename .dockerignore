@@ -23,7 +23,8 @@ docs/
 docker-compose.yml
 Dockerfile
 
-*.md
+# Exclude bot docs from *.md
 !bot/README.md
 !bot/PLAN.md
 !README.md
+*.md

@@ -3,6 +3,7 @@
 
 Usage:
     uv run bot.py --test "/start"     # Test mode (no Telegram connection)
+    uv run bot.py --test "question"   # Test mode with plain text (LLM routing)
     uv run bot.py                     # Production mode (connects to Telegram)
 """
 
@@ -21,29 +22,40 @@ from handlers import (
     handle_health,
     handle_labs,
     handle_scores,
+    route_intent,
 )
 
 
-async def run_test_mode(command: str) -> None:
-    """Run bot in test mode - call handler directly without Telegram."""
-    # Parse command and arguments
-    parts = command.strip().split(maxsplit=1)
-    cmd = parts[0]
-    args = parts[1] if len(parts) > 1 else ""
+async def run_test_mode(input_text: str) -> None:
+    """Run bot in test mode - call handler directly without Telegram.
 
-    # Route to appropriate handler (async handlers)
-    if cmd == "/start":
-        response = handle_start()
-    elif cmd == "/help":
-        response = handle_help()
-    elif cmd == "/health":
-        response = await handle_health()
-    elif cmd == "/labs":
-        response = await handle_labs()
-    elif cmd == "/scores":
-        response = await handle_scores(args)
+    Args:
+        input_text: Command or plain text message to process
+    """
+    input_text = input_text.strip()
+
+    # Check if it's a slash command
+    if input_text.startswith("/"):
+        parts = input_text.split(maxsplit=1)
+        cmd = parts[0]
+        args = parts[1] if len(parts) > 1 else ""
+
+        # Route to appropriate handler (async handlers)
+        if cmd == "/start":
+            response = handle_start()
+        elif cmd == "/help":
+            response = handle_help()
+        elif cmd == "/health":
+            response = await handle_health()
+        elif cmd == "/labs":
+            response = await handle_labs()
+        elif cmd == "/scores":
+            response = await handle_scores(args)
+        else:
+            response = f"Unknown command: {cmd}"
     else:
-        response = f"Unknown command: {cmd}"
+        # Plain text - use intent router with LLM
+        response = await route_intent(input_text)
 
     # Print response to stdout
     print(response)
@@ -61,13 +73,13 @@ def main() -> None:
     parser.add_argument(
         "--test",
         type=str,
-        metavar="COMMAND",
-        help="Run in test mode with the given command (e.g., '/start')",
+        metavar="MESSAGE",
+        help="Run in test mode with the given command or message (e.g., '/start' or 'what labs are available')",
     )
     args = parser.parse_args()
 
     if args.test:
-        # Test mode: call handler directly
+        # Test mode: call handler or intent router
         asyncio.run(run_test_mode(args.test))
     else:
         # Production mode: connect to Telegram
