@@ -9,6 +9,7 @@ This document describes the implementation plan for the LMS Telegram Bot across 
 **Goal:** Create project structure and development plan.
 
 **Deliverables:**
+
 - `bot/bot.py` — Entry point with `--test` mode
 - `bot/handlers/` — Command handlers (separated from Telegram)
 - `bot/services/` — API clients (for later tasks)
@@ -23,18 +24,28 @@ This document describes the implementation plan for the LMS Telegram Bot across 
 **Goal:** Connect bot to the LMS backend API.
 
 **Deliverables:**
+
 - `bot/services/lms_client.py` — HTTP client for LMS API
-- Implement real `/health` — check backend availability
+- Implement real `/health` — check backend availability and item count
 - Implement real `/labs` — fetch lab list from backend
-- Implement real `/scores` — fetch student scores from backend
+- Implement real `/scores <lab>` — fetch per-task pass rates from backend
+- Error handling — friendly messages with actual error details
 
 **Pattern:** API client with Bearer token authentication. All credentials loaded from environment variables.
+
+**Implementation:**
+
+- `/health` — Calls `GET /items/` endpoint, returns "Backend is healthy. N items available."
+- `/labs` — Filters items by type="lab", formats as "- lab-01 — Lab Title"
+- `/scores <lab>` — Calls `GET /analytics/pass-rates?lab=<lab_id>`, formats as "- Task: XX.X% (N attempts)"
+- Error handling — Catches ConnectError, HTTPStatusError and returns user-friendly messages with error details
 
 ## Task 3: Intent-Based Natural Language Routing
 
 **Goal:** Enable natural language queries using LLM.
 
 **Deliverables:**
+
 - `bot/services/llm_client.py` — LLM client for intent recognition
 - `bot/handlers/intent_router.py` — Route user messages to handlers based on intent
 - Tool descriptions for LLM to understand available commands
@@ -46,6 +57,7 @@ This document describes the implementation plan for the LMS Telegram Bot across 
 **Goal:** Deploy bot in Docker and document the solution.
 
 **Deliverables:**
+
 - `bot/Dockerfile` — Container image for the bot
 - `docker-compose.yml` update — Add bot service
 - Documentation in wiki/

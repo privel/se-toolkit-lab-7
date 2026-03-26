@@ -15,12 +15,17 @@ from services import LMSClient
 
 def handle_start() -> str:
     """Handle /start command."""
-    return "Welcome to the LMS Bot! Use /help to see available commands."
+    return "Welcome to the LMS Bot! I can help you check system health, browse labs, and view scores. Use /help to see all available commands."
 
 
 def handle_help() -> str:
     """Handle /help command."""
-    return "Available commands: /start, /help, /health, /labs, /scores"
+    return """Available commands:
+/start — Welcome message and bot introduction
+/help — Show this help message with all commands
+/health — Check if the backend is running and healthy
+/labs — List all available labs
+/scores <lab> — Show pass rates for a specific lab (e.g., /scores lab-04)"""
 
 
 async def handle_health() -> str:
@@ -35,15 +40,17 @@ async def handle_health() -> str:
             base_url=config["lms_api_base_url"],
             api_key=config["lms_api_key"],
         )
-        health = await client.get_health()
-        status = health.get("status", "unknown")
-        return f"Backend status: {status}"
+        items = await client.get_labs()
+        item_count = len(items) if items else 0
+        return f"Backend is healthy. {item_count} items available."
     except httpx.ConnectError as e:
-        return f"Cannot connect to backend: {e}"
+        return (
+            f"Backend error: connection refused. Check that the services are running."
+        )
     except httpx.HTTPStatusError as e:
-        return f"Backend error: {e.response.status_code}"
+        return f"Backend error: HTTP {e.response.status_code}. The backend service may be down."
     except Exception as e:
-        return f"Error: {e}"
+        return f"Backend error: {str(e)}. Check that the services are running."
 
 
 async def handle_labs() -> str:
@@ -69,15 +76,22 @@ async def handle_labs() -> str:
         result = ["Available labs:"]
         for lab in labs:
             title = lab.get("title", "Unknown")
-            result.append(f"  • {title}")
+            # Extract lab number from slug if available
+            slug = lab.get("slug", "")
+            if slug:
+                result.append(f"- {slug} — {title}")
+            else:
+                result.append(f"- {title}")
 
         return "\n".join(result)
     except httpx.ConnectError as e:
-        return f"Cannot connect to backend: {e}"
+        return (
+            f"Backend error: connection refused. Check that the services are running."
+        )
     except httpx.HTTPStatusError as e:
-        return f"Backend error: {e.response.status_code}"
+        return f"Backend error: HTTP {e.response.status_code}. The backend service may be down."
     except Exception as e:
-        return f"Error: {e}"
+        return f"Backend error: {str(e)}. Check that the services are running."
 
 
 async def handle_scores(lab_id: Optional[str] = None) -> str:
@@ -94,29 +108,43 @@ async def handle_scores(lab_id: Optional[str] = None) -> str:
     if not config["lms_api_base_url"]:
         return "Error: LMS_API_BASE_URL not configured"
 
+    # Handle missing lab_id argument
+    if not lab_id or not lab_id.strip():
+        return "Usage: /scores <lab-id>. Example: /scores lab-04"
+
     try:
         client = LMSClient(
             base_url=config["lms_api_base_url"],
             api_key=config["lms_api_key"],
         )
-        scores = await client.get_scores(lab_id)
+        # Use pass-rates endpoint for per-task data
+        pass_rates = await client.get_pass_rates(lab_id)
 
-        if not scores:
-            return f"No scores found{'for ' + lab_id if lab_id else ''}"
+        if not pass_rates:
+            return f"No pass rates found for {lab_id}. Check that the lab exists."
 
-        result = [f"Scores{' for ' + lab_id if lab_id else ''}:"]
-        for score in scores[:10]:  # Limit to 10 results
-            title = score.get("item_title", "Unknown")
-            value = score.get("score", "N/A")
-            result.append(f"  • {title}: {value}")
+        # Extract lab name for display
+        lab_name = lab_id.replace("lab-", "Lab ").replace("-", " ").title()
 
-        if len(scores) > 10:
-            result.append(f"  ... and {len(scores) - 10} more")
+        result = [f"Pass rates for {lab_name}:"]
+        for rate in pass_rates:
+            task_name = rate.get("task_name", rate.get("item_title", "Unknown"))
+            pass_rate = rate.get("pass_rate", rate.get("score", 0))
+            attempts = rate.get("attempts", 0)
+            # Format as percentage
+            percentage = (
+                f"{pass_rate:.1f}%"
+                if isinstance(pass_rate, (int, float))
+                else str(pass_rate)
+            )
+            result.append(f"- {task_name}: {percentage} ({attempts} attempts)")
 
         return "\n".join(result)
     except httpx.ConnectError as e:
-        return f"Cannot connect to backend: {e}"
+        return (
+            f"Backend error: connection refused. Check that the services are running."
+        )
     except httpx.HTTPStatusError as e:
-        return f"Backend error: {e.response.status_code}"
+        return f"Backend error: HTTP {e.response.status_code}. The backend service may be down."
     except Exception as e:
-        return f"Error: {e}"
+        return f"Backend error: {str(e)}. Check that the services are running."
