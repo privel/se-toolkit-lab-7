@@ -5,8 +5,9 @@ They don't depend on Telegram - same logic works from --test mode,
 unit tests, or Telegram.
 """
 
-import asyncio
 from typing import Optional
+
+import httpx
 
 from config import load_config
 from services import LMSClient
@@ -22,7 +23,7 @@ def handle_help() -> str:
     return "Available commands: /start, /help, /health, /labs, /scores"
 
 
-async def handle_health_async() -> str:
+async def handle_health() -> str:
     """Handle /health command - check backend availability."""
     config = load_config()
 
@@ -45,12 +46,7 @@ async def handle_health_async() -> str:
         return f"Error: {e}"
 
 
-def handle_health() -> str:
-    """Handle /health command (sync wrapper)."""
-    return asyncio.run(handle_health_async())
-
-
-async def handle_labs_async() -> str:
+async def handle_labs() -> str:
     """Handle /labs command - fetch labs from backend."""
     config = load_config()
 
@@ -84,12 +80,7 @@ async def handle_labs_async() -> str:
         return f"Error: {e}"
 
 
-def handle_labs() -> str:
-    """Handle /labs command (sync wrapper)."""
-    return asyncio.run(handle_labs_async())
-
-
-async def handle_scores_async(lab_id: Optional[str] = None) -> str:
+async def handle_scores(lab_id: Optional[str] = None) -> str:
     """Handle /scores command - fetch scores from backend.
 
     Args:
@@ -129,12 +120,3 @@ async def handle_scores_async(lab_id: Optional[str] = None) -> str:
         return f"Backend error: {e.response.status_code}"
     except Exception as e:
         return f"Error: {e}"
-
-
-def handle_scores(args: str = "") -> str:
-    """Handle /scores command (sync wrapper)."""
-    return asyncio.run(handle_scores_async(args if args else None))
-
-
-# Import httpx at module level for exception handling
-import httpx

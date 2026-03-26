@@ -31,17 +31,17 @@ async def run_test_mode(command: str) -> None:
     cmd = parts[0]
     args = parts[1] if len(parts) > 1 else ""
 
-    # Route to appropriate handler
+    # Route to appropriate handler (async handlers)
     if cmd == "/start":
         response = handle_start()
     elif cmd == "/help":
         response = handle_help()
     elif cmd == "/health":
-        response = handle_health()
+        response = await handle_health()
     elif cmd == "/labs":
-        response = handle_labs()
+        response = await handle_labs()
     elif cmd == "/scores":
-        response = handle_scores(args)
+        response = await handle_scores(args)
     else:
         response = f"Unknown command: {cmd}"
 
