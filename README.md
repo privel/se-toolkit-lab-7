@@ -95,3 +95,92 @@ By the end of this lab, you should be able to say:
 ### Optional
 
 1. [Flutter Web Chatbot](./lab/tasks/optional/task-1.md)
+
+## Deploy
+
+### Prerequisites
+
+- Docker and Docker Compose installed on VM
+- Backend services running (postgres, backend, caddy)
+- Environment files configured:
+  - `.env.docker.secret` — Docker Compose environment (backend, bot credentials)
+  - `.env.bot.secret` — Bot-specific secrets (for local testing)
+
+### Required Environment Variables
+
+Add these to `.env.docker.secret`:
+
+```bash
+# Telegram Bot
+BOT_TOKEN=your-bot-token-from-botfather
+
+# LMS Backend (bot connects via Docker network)
+LMS_API_KEY=secret
+
+# LLM API (Qwen proxy)
+LLM_API_MODEL=coder-model
+LLM_API_KEY=your-llm-api-key
+LLM_API_BASE_URL=http://host.docker.internal:42005/v1
+```
+
+> **Note:** `LLM_API_BASE_URL` uses `host.docker.internal` to reach the host machine from inside the Docker container. The Qwen proxy runs on the host, not in Docker.
+
+### Deploy Commands
+
+```bash
+# Navigate to project
+cd ~/se-toolkit-lab-7
+
+# Stop any running bot process (from nohup development)
+pkill -f "bot.py" 2>/dev/null || true
+
+# Build and start all services (including bot)
+docker compose --env-file .env.docker.secret up --build -d
+
+# Check status
+docker compose --env-file .env.docker.secret ps
+
+# View bot logs
+docker compose --env-file .env.docker.secret logs bot --tail 50
+```
+
+### Verify Deployment
+
+1. **Check bot is running:**
+
+   ```bash
+   docker ps | grep bot
+   ```
+
+2. **Test in Telegram:**
+   - `/start` — Welcome message
+   - `/health` — Backend status
+   - "what labs are available?" — Natural language query
+
+3. **Check logs for errors:**
+
+   ```bash
+   docker compose logs bot --tail 20
+   ```
+
+### Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| Bot container restarting | Check logs: `docker compose logs bot`. Usually missing env var or import error. |
+| `/health` fails | `LMS_API_BASE_URL` must be `http://backend:8000` (Docker service name). |
+| LLM queries fail | `LLM_API_BASE_URL` must use `host.docker.internal`, not `localhost`. |
+| Token expired (401) | Restart Qwen proxy: `cd ~/qwen-code-oai-proxy && docker compose restart`. |
+
+### Stop / Remove
+
+```bash
+# Stop bot only
+docker compose --env-file .env.docker.secret stop bot
+
+# Remove bot container
+docker compose --env-file .env.docker.secret rm -f bot
+
+# Stop all services
+docker compose --env-file .env.docker.secret down
+```
