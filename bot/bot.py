@@ -8,37 +8,20 @@ Usage:
 
 import argparse
 import asyncio
-import os
 import sys
 from pathlib import Path
 
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add bot directory to path for imports
+bot_dir = Path(__file__).parent
+sys.path.insert(0, str(bot_dir))
 
-
-def handle_start() -> str:
-    """Handle /start command."""
-    return "Welcome to the LMS Bot! Use /help to see available commands."
-
-
-def handle_help() -> str:
-    """Handle /help command."""
-    return "Available commands: /start, /help, /health, /labs, /scores"
-
-
-def handle_health() -> str:
-    """Handle /health command."""
-    return "Bot is healthy (placeholder)"
-
-
-def handle_labs() -> str:
-    """Handle /labs command."""
-    return "Labs list (placeholder)"
-
-
-def handle_scores(args: str) -> str:
-    """Handle /scores command."""
-    return f"Scores for {args if args else 'all labs'} (placeholder)"
+from handlers import (
+    handle_start,
+    handle_help,
+    handle_health,
+    handle_labs,
+    handle_scores,
+)
 
 
 async def run_test_mode(command: str) -> None:
