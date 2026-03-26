@@ -24,3 +24,6 @@ docker-compose.yml
 Dockerfile
 
 *.md
+!bot/README.md
+!bot/PLAN.md
+!README.md
