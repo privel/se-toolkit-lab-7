@@ -1,0 +1,421 @@
+backend-1  | WARNING:  Current configuration will not reload as not all conditions are met, please refer to documentation.
+backend-1  | INFO:     Started server process [7]
+backend-1  | INFO:     Waiting for application startup.
+backend-1  | INFO:     Application startup complete.
+backend-1  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+backend-1  | INFO:     172.18.0.5:56370 - "GET /docs HTTP/1.1" 200 OK
+backend-1  | INFO:     172.18.0.5:56380 - "GET /openapi.json HTTP/1.1" 200 OK
+backend-1  | INFO:     172.18.0.5:57030 - "GET /items/ HTTP/1.1" 200 OK
+backend-1  | INFO:     172.18.0.5:34746 - "POST /pipeline/sync HTTP/1.1" 500 Internal Server Error
+backend-1  | ERROR:    Exception in ASGI application
+backend-1  | Traceback (most recent call last):
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 101, in map_httpcore_exceptions
+backend-1  |     yield
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 394, in handle_async_request
+backend-1  |     resp = await self._pool.handle_async_request(req)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/connection_pool.py", line 256, in handle_async_request
+backend-1  |     raise exc from None
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/connection_pool.py", line 236, in handle_async_request
+backend-1  |     response = await connection.handle_async_request(
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |         pool_request.request
+backend-1  |         ^^^^^^^^^^^^^^^^^^^^
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/connection.py", line 103, in handle_async_request
+backend-1  |     return await self._connection.handle_async_request(request)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/http11.py", line 136, in handle_async_request
+backend-1  |     raise exc
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/http11.py", line 106, in handle_async_request
+backend-1  |     ) = await self._receive_response_headers(**kwargs)
+backend-1  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/http11.py", line 177, in _receive_response_headers
+backend-1  |     event = await self._receive_event(timeout=timeout)
+backend-1  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/http11.py", line 231, in _receive_event
+backend-1  |     raise RemoteProtocolError(msg)
+backend-1  | httpcore.RemoteProtocolError: Server disconnected without sending a response.
+backend-1  | 
+backend-1  | The above exception was the direct cause of the following exception:
+backend-1  | 
+backend-1  | Traceback (most recent call last):
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
+backend-1  |     result = await app(  # type: ignore[func-returns-value]
+backend-1  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |         self.scope, self.receive, self.send
+backend-1  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+backend-1  |     return await self.app(scope, receive, send)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/applications.py", line 1138, in __call__
+backend-1  |     await super().__call__(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+backend-1  |     await self.middleware_stack(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+backend-1  |     raise exc
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+backend-1  |     await self.app(scope, receive, _send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 95, in __call__
+backend-1  |     await self.simple_response(scope, receive, send, request_headers=headers)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 153, in simple_response
+backend-1  |     await self.app(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+backend-1  |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+backend-1  |     raise exc
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+backend-1  |     await app(scope, receive, sender)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+backend-1  |     await self.app(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+backend-1  |     await self.middleware_stack(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+backend-1  |     await route.handle(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+backend-1  |     await self.app(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 121, in app
+backend-1  |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+backend-1  |     raise exc
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+backend-1  |     await app(scope, receive, sender)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 107, in app
+backend-1  |     response = await f(request)
+backend-1  |                ^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 426, in app
+backend-1  |     raw_response = await run_endpoint_function(
+backend-1  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |     ...<3 lines>...
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 314, in run_endpoint_function
+backend-1  |     return await dependant.call(**values)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/backend/app/routers/pipeline.py", line 19, in post_sync
+backend-1  |     return await sync(session)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/backend/app/etl.py", line 244, in sync
+backend-1  |     logs = await fetch_logs(since)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/backend/app/etl.py", line 85, in fetch_logs
+backend-1  |     resp = await client.get(
+backend-1  |            ^^^^^^^^^^^^^^^^^
+backend-1  |     ...<3 lines>...
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1768, in get
+backend-1  |     return await self.request(
+backend-1  |            ^^^^^^^^^^^^^^^^^^^
+backend-1  |     ...<9 lines>...
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1540, in request
+backend-1  |     return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1629, in send
+backend-1  |     response = await self._send_handling_auth(
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |     ...<4 lines>...
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1657, in _send_handling_auth
+backend-1  |     response = await self._send_handling_redirects(
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |     ...<3 lines>...
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1694, in _send_handling_redirects
+backend-1  |     response = await self._send_single_request(request)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1730, in _send_single_request
+backend-1  |     response = await transport.handle_async_request(request)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 393, in handle_async_request
+backend-1  |     with map_httpcore_exceptions():
+backend-1  |          ~~~~~~~~~~~~~~~~~~~~~~~^^
+backend-1  |   File "/usr/local/lib/python3.14/contextlib.py", line 162, in __exit__
+backend-1  |     self.gen.throw(value)
+backend-1  |     ~~~~~~~~~~~~~~^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+backend-1  |     raise mapped_exc(message) from exc
+backend-1  | httpx.RemoteProtocolError: Server disconnected without sending a response.
+backend-1  | INFO:     172.18.0.5:57054 - "POST /pipeline/sync HTTP/1.1" 500 Internal Server Error
+backend-1  | ERROR:    Exception in ASGI application
+backend-1  | Traceback (most recent call last):
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 101, in map_httpcore_exceptions
+backend-1  |     yield
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 394, in handle_async_request
+backend-1  |     resp = await self._pool.handle_async_request(req)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/connection_pool.py", line 256, in handle_async_request
+backend-1  |     raise exc from None
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/connection_pool.py", line 236, in handle_async_request
+backend-1  |     response = await connection.handle_async_request(
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |         pool_request.request
+backend-1  |         ^^^^^^^^^^^^^^^^^^^^
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/connection.py", line 103, in handle_async_request
+backend-1  |     return await self._connection.handle_async_request(request)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/http11.py", line 136, in handle_async_request
+backend-1  |     raise exc
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/http11.py", line 106, in handle_async_request
+backend-1  |     ) = await self._receive_response_headers(**kwargs)
+backend-1  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/http11.py", line 177, in _receive_response_headers
+backend-1  |     event = await self._receive_event(timeout=timeout)
+backend-1  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/http11.py", line 231, in _receive_event
+backend-1  |     raise RemoteProtocolError(msg)
+backend-1  | httpcore.RemoteProtocolError: Server disconnected without sending a response.
+backend-1  | 
+backend-1  | The above exception was the direct cause of the following exception:
+backend-1  | 
+backend-1  | Traceback (most recent call last):
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
+backend-1  |     result = await app(  # type: ignore[func-returns-value]
+backend-1  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |         self.scope, self.receive, self.send
+backend-1  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+backend-1  |     return await self.app(scope, receive, send)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/applications.py", line 1138, in __call__
+backend-1  |     await super().__call__(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+backend-1  |     await self.middleware_stack(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+backend-1  |     raise exc
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+backend-1  |     await self.app(scope, receive, _send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 95, in __call__
+backend-1  |     await self.simple_response(scope, receive, send, request_headers=headers)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 153, in simple_response
+backend-1  |     await self.app(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+backend-1  |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+backend-1  |     raise exc
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+backend-1  |     await app(scope, receive, sender)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+backend-1  |     await self.app(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+backend-1  |     await self.middleware_stack(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+backend-1  |     await route.handle(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+backend-1  |     await self.app(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 121, in app
+backend-1  |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+backend-1  |     raise exc
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+backend-1  |     await app(scope, receive, sender)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 107, in app
+backend-1  |     response = await f(request)
+backend-1  |                ^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 426, in app
+backend-1  |     raw_response = await run_endpoint_function(
+backend-1  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |     ...<3 lines>...
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 314, in run_endpoint_function
+backend-1  |     return await dependant.call(**values)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/backend/app/routers/pipeline.py", line 19, in post_sync
+backend-1  |     return await sync(session)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/backend/app/etl.py", line 244, in sync
+backend-1  |     logs = await fetch_logs(since)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/backend/app/etl.py", line 85, in fetch_logs
+backend-1  |     resp = await client.get(
+backend-1  |            ^^^^^^^^^^^^^^^^^
+backend-1  |     ...<3 lines>...
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1768, in get
+backend-1  |     return await self.request(
+backend-1  |            ^^^^^^^^^^^^^^^^^^^
+backend-1  |     ...<9 lines>...
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1540, in request
+backend-1  |     return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1629, in send
+backend-1  |     response = await self._send_handling_auth(
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |     ...<4 lines>...
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1657, in _send_handling_auth
+backend-1  |     response = await self._send_handling_redirects(
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |     ...<3 lines>...
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1694, in _send_handling_redirects
+backend-1  |     response = await self._send_single_request(request)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1730, in _send_single_request
+backend-1  |     response = await transport.handle_async_request(request)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 393, in handle_async_request
+backend-1  |     with map_httpcore_exceptions():
+backend-1  |          ~~~~~~~~~~~~~~~~~~~~~~~^^
+backend-1  |   File "/usr/local/lib/python3.14/contextlib.py", line 162, in __exit__
+backend-1  |     self.gen.throw(value)
+backend-1  |     ~~~~~~~~~~~~~~^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+backend-1  |     raise mapped_exc(message) from exc
+backend-1  | httpx.RemoteProtocolError: Server disconnected without sending a response.
+backend-1  | INFO:     172.18.0.5:41304 - "GET /docs HTTP/1.1" 200 OK
+backend-1  | INFO:     172.18.0.5:41314 - "GET /openapi.json HTTP/1.1" 200 OK
+backend-1  | INFO:     172.18.0.5:43518 - "POST /pipeline/sync HTTP/1.1" 500 Internal Server Error
+backend-1  | ERROR:    Exception in ASGI application
+backend-1  | Traceback (most recent call last):
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 101, in map_httpcore_exceptions
+backend-1  |     yield
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 394, in handle_async_request
+backend-1  |     resp = await self._pool.handle_async_request(req)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/connection_pool.py", line 256, in handle_async_request
+backend-1  |     raise exc from None
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/connection_pool.py", line 236, in handle_async_request
+backend-1  |     response = await connection.handle_async_request(
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |         pool_request.request
+backend-1  |         ^^^^^^^^^^^^^^^^^^^^
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/connection.py", line 103, in handle_async_request
+backend-1  |     return await self._connection.handle_async_request(request)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/http11.py", line 136, in handle_async_request
+backend-1  |     raise exc
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/http11.py", line 106, in handle_async_request
+backend-1  |     ) = await self._receive_response_headers(**kwargs)
+backend-1  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/http11.py", line 177, in _receive_response_headers
+backend-1  |     event = await self._receive_event(timeout=timeout)
+backend-1  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpcore/_async/http11.py", line 231, in _receive_event
+backend-1  |     raise RemoteProtocolError(msg)
+backend-1  | httpcore.RemoteProtocolError: Server disconnected without sending a response.
+backend-1  | 
+backend-1  | The above exception was the direct cause of the following exception:
+backend-1  | 
+backend-1  | Traceback (most recent call last):
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
+backend-1  |     result = await app(  # type: ignore[func-returns-value]
+backend-1  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |         self.scope, self.receive, self.send
+backend-1  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+backend-1  |     return await self.app(scope, receive, send)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/applications.py", line 1138, in __call__
+backend-1  |     await super().__call__(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/applications.py", line 107, in __call__
+backend-1  |     await self.middleware_stack(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+backend-1  |     raise exc
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+backend-1  |     await self.app(scope, receive, _send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 95, in __call__
+backend-1  |     await self.simple_response(scope, receive, send, request_headers=headers)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 153, in simple_response
+backend-1  |     await self.app(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+backend-1  |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+backend-1  |     raise exc
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+backend-1  |     await app(scope, receive, sender)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+backend-1  |     await self.app(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/routing.py", line 716, in __call__
+backend-1  |     await self.middleware_stack(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/routing.py", line 736, in app
+backend-1  |     await route.handle(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/routing.py", line 290, in handle
+backend-1  |     await self.app(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 121, in app
+backend-1  |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+backend-1  |     raise exc
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+backend-1  |     await app(scope, receive, sender)
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 107, in app
+backend-1  |     response = await f(request)
+backend-1  |                ^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 426, in app
+backend-1  |     raw_response = await run_endpoint_function(
+backend-1  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |     ...<3 lines>...
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 314, in run_endpoint_function
+backend-1  |     return await dependant.call(**values)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/backend/app/routers/pipeline.py", line 19, in post_sync
+backend-1  |     return await sync(session)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/backend/app/etl.py", line 244, in sync
+backend-1  |     logs = await fetch_logs(since)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/backend/app/etl.py", line 85, in fetch_logs
+backend-1  |     resp = await client.get(
+backend-1  |            ^^^^^^^^^^^^^^^^^
+backend-1  |     ...<3 lines>...
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1768, in get
+backend-1  |     return await self.request(
+backend-1  |            ^^^^^^^^^^^^^^^^^^^
+backend-1  |     ...<9 lines>...
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1540, in request
+backend-1  |     return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+backend-1  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1629, in send
+backend-1  |     response = await self._send_handling_auth(
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |     ...<4 lines>...
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1657, in _send_handling_auth
+backend-1  |     response = await self._send_handling_redirects(
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |     ...<3 lines>...
+backend-1  |     )
+backend-1  |     ^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1694, in _send_handling_redirects
+backend-1  |     response = await self._send_single_request(request)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1730, in _send_single_request
+backend-1  |     response = await transport.handle_async_request(request)
+backend-1  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 393, in handle_async_request
+backend-1  |     with map_httpcore_exceptions():
+backend-1  |          ~~~~~~~~~~~~~~~~~~~~~~~^^
+backend-1  |   File "/usr/local/lib/python3.14/contextlib.py", line 162, in __exit__
+backend-1  |     self.gen.throw(value)
+backend-1  |     ~~~~~~~~~~~~~~^^^^^^^
+backend-1  |   File "/app/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+backend-1  |     raise mapped_exc(message) from exc
+backend-1  | httpx.RemoteProtocolError: Server disconnected without sending a response.

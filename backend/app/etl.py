@@ -68,11 +68,19 @@ async def fetch_items() -> list[ApiItem]:
 async def fetch_logs(since: datetime | None = None) -> list[ApiLog]:
     """Fetch check results from the autochecker API with pagination."""
     all_logs: list[ApiLog] = []
+    max_pages = 20  # Safety limit to avoid infinite loops
+    page_count = 0
 
-    async with httpx.AsyncClient(timeout=60, follow_redirects=True) as client:
-        cursor = since
-        while True:
-            params: dict[str, str | int] = {"limit": 500}
+    cursor = since
+    while page_count < max_pages:
+        # Create a new client for each request to avoid connection issues
+        # with long-running pagination (server may drop keep-alive connections)
+        async with httpx.AsyncClient(
+            timeout=120,
+            follow_redirects=True,
+            http2=False,  # Disable HTTP/2 for compatibility
+        ) as client:
+            params: dict[str, str | int] = {"limit": 100}
             if cursor is not None:
                 params["since"] = cursor.isoformat()
 
@@ -84,12 +92,13 @@ async def fetch_logs(since: datetime | None = None) -> list[ApiLog]:
             resp.raise_for_status()
             page = ApiLogsPage.model_validate(resp.json())
 
-            all_logs.extend(page.logs)
+        all_logs.extend(page.logs)
 
-            if not page.has_more or not page.logs:
-                break
+        if not page.has_more or not page.logs:
+            break
 
-            cursor = datetime.fromisoformat(page.logs[-1].submitted_at)
+        cursor = datetime.fromisoformat(page.logs[-1].submitted_at)
+        page_count += 1
 
     return all_logs
 
