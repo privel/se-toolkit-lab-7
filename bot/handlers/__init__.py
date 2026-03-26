@@ -84,7 +84,7 @@ async def handle_scores(lab_id: Optional[str] = None) -> str:
     """Handle /scores command - fetch scores from backend.
 
     Args:
-        lab_id: Optional lab identifier.
+        lab_id: Lab identifier (required).
 
     Returns:
         Scores information string.
@@ -94,6 +94,9 @@ async def handle_scores(lab_id: Optional[str] = None) -> str:
     if not config["lms_api_base_url"]:
         return "Error: LMS_API_BASE_URL not configured"
 
+    if not lab_id:
+        return "Usage: /scores <lab-id> (e.g., /scores lab-04)"
+
     try:
         client = LMSClient(
             base_url=config["lms_api_base_url"],
@@ -102,16 +105,14 @@ async def handle_scores(lab_id: Optional[str] = None) -> str:
         scores = await client.get_scores(lab_id)
 
         if not scores:
-            return f"No scores found{'for ' + lab_id if lab_id else ''}"
+            return f"No scores found for {lab_id}"
 
-        result = [f"Scores{' for ' + lab_id if lab_id else ''}:"]
-        for score in scores[:10]:  # Limit to 10 results
-            title = score.get("item_title", "Unknown")
-            value = score.get("score", "N/A")
-            result.append(f"  • {title}: {value}")
-
-        if len(scores) > 10:
-            result.append(f"  ... and {len(scores) - 10} more")
+        # Scores are bucket distributions
+        result = [f"Score distribution for {lab_id}:"]
+        for bucket in scores:
+            bucket_range = bucket.get("bucket", "Unknown")
+            count = bucket.get("count", 0)
+            result.append(f"  • {bucket_range}: {count} students")
 
         return "\n".join(result)
     except httpx.ConnectError as e:

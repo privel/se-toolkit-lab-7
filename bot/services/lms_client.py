@@ -15,7 +15,7 @@ class LMSClient:
 
     def __init__(self, base_url: str, api_key: str):
         """Initialize the LMS client.
-        
+
         Args:
             base_url: Base URL of the LMS API (e.g., http://localhost:42002)
             api_key: API key for authentication (Bearer token)
@@ -26,18 +26,20 @@ class LMSClient:
 
     async def get_health(self) -> dict:
         """Check if the backend is healthy.
-        
+
         Returns:
-            Health status dictionary.
+            Health status dictionary with 'status' key.
         """
         async with httpx.AsyncClient() as client:
-            resp = await client.get(f"{self.base_url}/health", headers=self._headers)
+            # Use /items/ endpoint to check backend availability
+            resp = await client.get(f"{self.base_url}/items/", headers=self._headers)
             resp.raise_for_status()
-            return resp.json()
+            items = resp.json()
+            return {"status": "ok", "items_count": len(items)}
 
     async def get_labs(self) -> list[dict]:
         """Fetch list of labs and tasks.
-        
+
         Returns:
             List of lab and task items.
         """
@@ -48,17 +50,18 @@ class LMSClient:
 
     async def get_scores(self, lab_id: Optional[str] = None) -> list[dict]:
         """Fetch student scores.
-        
+
         Args:
             lab_id: Optional lab identifier to filter scores.
-            
+
         Returns:
-            List of score records.
+            List of score records (bucket distribution).
         """
         async with httpx.AsyncClient() as client:
             url = f"{self.base_url}/analytics/scores"
+            params = {}
             if lab_id:
-                url += f"?lab_id={lab_id}"
-            resp = await client.get(url, headers=self._headers)
+                params["lab"] = lab_id
+            resp = await client.get(url, headers=self._headers, params=params)
             resp.raise_for_status()
             return resp.json()
