@@ -9,8 +9,8 @@ RUN pip install --no-cache-dir uv
 # Set working directory
 WORKDIR /app
 
-# Copy pyproject.toml and uv.lock (if exists) for dependency installation
-COPY pyproject.toml uv.lock* ./
+# Copy pyproject.toml, uv.lock (if exists), and README.md for build
+COPY pyproject.toml uv.lock* README.md* ./
 
 # Install dependencies using uv
 # --frozen ensures reproducible builds from lock file
