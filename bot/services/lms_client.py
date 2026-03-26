@@ -49,7 +49,7 @@ class LMSClient:
             return resp.json()
 
     async def get_scores(self, lab_id: Optional[str] = None) -> list[dict]:
-        """Fetch student scores.
+        """Fetch student scores (bucket distribution).
 
         Args:
             lab_id: Optional lab identifier to filter scores.
@@ -62,6 +62,22 @@ class LMSClient:
             params = {}
             if lab_id:
                 params["lab"] = lab_id
+            resp = await client.get(url, headers=self._headers, params=params)
+            resp.raise_for_status()
+            return resp.json()
+
+    async def get_pass_rates(self, lab_id: str) -> list[dict]:
+        """Fetch per-task pass rates for a lab.
+
+        Args:
+            lab_id: Lab identifier (e.g., "lab-04").
+
+        Returns:
+            List of task pass rates with avg_score and attempts.
+        """
+        async with httpx.AsyncClient() as client:
+            url = f"{self.base_url}/analytics/pass-rates"
+            params = {"lab": lab_id}
             resp = await client.get(url, headers=self._headers, params=params)
             resp.raise_for_status()
             return resp.json()

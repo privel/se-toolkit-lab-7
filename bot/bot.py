@@ -43,7 +43,7 @@ async def run_test_mode(command: str) -> None:
     elif cmd == "/scores":
         response = await handle_scores(args)
     else:
-        response = f"Unknown command: {cmd}"
+        response = f"Unknown command: {cmd}. Use /help to see available commands."
 
     # Print response to stdout
     print(response)

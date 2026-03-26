@@ -20,7 +20,12 @@ def handle_start() -> str:
 
 def handle_help() -> str:
     """Handle /help command."""
-    return "Available commands: /start, /help, /health, /labs, /scores"
+    return """Available commands:
+  /start — Welcome message
+  /help — Show this help message
+  /health — Check backend status
+  /labs — List available labs
+  /scores <lab> — Show score distribution for a lab (e.g., /scores lab-04)"""
 
 
 async def handle_health() -> str:
@@ -37,13 +42,16 @@ async def handle_health() -> str:
         )
         health = await client.get_health()
         status = health.get("status", "unknown")
-        return f"Backend status: {status}"
+        items_count = health.get("items_count", 0)
+        return f"Backend is healthy. {items_count} items available."
     except httpx.ConnectError as e:
-        return f"Cannot connect to backend: {e}"
+        return f"Backend error: connection refused. Check that the services are running. ({e})"
     except httpx.HTTPStatusError as e:
-        return f"Backend error: {e.response.status_code}"
+        return f"Backend error: HTTP {e.response.status_code}. The backend service may be down."
+    except httpx.HTTPError as e:
+        return f"Backend error: {e}"
     except Exception as e:
-        return f"Error: {e}"
+        return f"Backend error: {e}"
 
 
 async def handle_labs() -> str:
@@ -81,13 +89,13 @@ async def handle_labs() -> str:
 
 
 async def handle_scores(lab_id: Optional[str] = None) -> str:
-    """Handle /scores command - fetch scores from backend.
+    """Handle /scores command - fetch pass rates from backend.
 
     Args:
         lab_id: Lab identifier (required).
 
     Returns:
-        Scores information string.
+        Pass rates information string.
     """
     config = load_config()
 
@@ -102,22 +110,26 @@ async def handle_scores(lab_id: Optional[str] = None) -> str:
             base_url=config["lms_api_base_url"],
             api_key=config["lms_api_key"],
         )
-        scores = await client.get_scores(lab_id)
+        pass_rates = await client.get_pass_rates(lab_id)
 
-        if not scores:
-            return f"No scores found for {lab_id}"
+        if not pass_rates:
+            return f"No pass rates found for {lab_id}. The lab may not exist."
 
-        # Scores are bucket distributions
-        result = [f"Score distribution for {lab_id}:"]
-        for bucket in scores:
-            bucket_range = bucket.get("bucket", "Unknown")
-            count = bucket.get("count", 0)
-            result.append(f"  • {bucket_range}: {count} students")
+        result = [f"Pass rates for {lab_id}:"]
+        for task in pass_rates:
+            task_name = task.get("task", "Unknown")
+            avg_score = task.get("avg_score", 0)
+            attempts = task.get("attempts", 0)
+            result.append(f"  • {task_name}: {avg_score}% ({attempts} attempts)")
 
         return "\n".join(result)
     except httpx.ConnectError as e:
-        return f"Cannot connect to backend: {e}"
+        return f"Backend error: connection refused. Check that the services are running. ({e})"
     except httpx.HTTPStatusError as e:
-        return f"Backend error: {e.response.status_code}"
+        if e.response.status_code == 422:
+            return f"Invalid lab ID: {lab_id}. Use format like 'lab-01'."
+        return f"Backend error: HTTP {e.response.status_code}. The backend service may be down."
+    except httpx.HTTPError as e:
+        return f"Backend error: {e}"
     except Exception as e:
-        return f"Error: {e}"
+        return f"Backend error: {e}"
