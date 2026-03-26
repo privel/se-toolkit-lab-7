@@ -11,6 +11,8 @@ Routes user messages through LLM with tool calling:
 import sys
 from typing import Any
 
+import httpx
+
 from config import load_config
 from services import LLMClient, LMSClient, get_tools_definitions, get_system_prompt
 
@@ -35,120 +37,154 @@ async def route(message: str, debug: bool = True) -> str:
     if not config.get("llm_api_base_url") or not config.get("llm_api_key"):
         return "LLM is not configured. Please set LLM_API_BASE_URL and LLM_API_KEY in .env.bot.secret"
 
-    # Initialize clients
-    llm_client = LLMClient(
-        api_key=config["llm_api_key"],
-        base_url=config["llm_api_base_url"],
-        model=config.get("llm_api_model", "coder-model"),
-    )
-
-    lms_client = LMSClient(
-        base_url=config["lms_api_base_url"],
-        api_key=config["lms_api_key"],
-    )
-
-    # Get tool definitions and system prompt
-    tools = get_tools_definitions()
-    system_prompt = get_system_prompt()
-
-    # Conversation history
-    messages: list[dict[str, Any]] = [
-        {"role": "user", "content": message}
-    ]
-
-    # Tool call results for building tool response messages
-    tool_results: list[dict[str, Any]] = []
-
-    iteration = 0
-    while iteration < MAX_ITERATIONS:
-        iteration += 1
-
-        if debug:
-            print(
-                f"[loop] Iteration {iteration}, {len(messages)} messages",
-                file=sys.stderr,
-            )
-
-        # Call LLM
-        response = await llm_client.chat(
-            messages=messages,
-            tools=tools,
-            system_prompt=system_prompt,
+    try:
+        # Initialize clients
+        llm_client = LLMClient(
+            api_key=config["llm_api_key"],
+            base_url=config["llm_api_base_url"],
+            model=config.get("llm_api_model", "coder-model"),
         )
 
-        # Extract tool calls
-        tool_calls = llm_client.extract_tool_calls(response)
+        lms_client = LMSClient(
+            base_url=config["lms_api_base_url"],
+            api_key=config["lms_api_key"],
+        )
 
-        # If no tool calls, LLM has a final answer
-        if not tool_calls:
-            response_text = llm_client.get_response_text(response)
-            if debug and response_text:
-                print(
-                    f"[response] LLM returned text response",
-                    file=sys.stderr,
-                )
-            return response_text or "I'm not sure how to help with that. Try asking about labs, scores, or students."
+        # Get tool definitions and system prompt
+        tools = get_tools_definitions()
+        system_prompt = get_system_prompt()
 
-        # Execute each tool call
-        for tool_call in tool_calls:
-            tool_name = tool_call["name"]
-            tool_args = tool_call["arguments"]
-            tool_id = tool_call["id"]
+        # Conversation history
+        messages: list[dict[str, Any]] = [{"role": "user", "content": message}]
+
+        # Tool call results for building tool response messages
+        tool_results: list[dict[str, Any]] = []
+
+        iteration = 0
+        while iteration < MAX_ITERATIONS:
+            iteration += 1
 
             if debug:
                 print(
-                    f"[tool] LLM called: {tool_name}({tool_args})",
+                    f"[loop] Iteration {iteration}, {len(messages)} messages",
                     file=sys.stderr,
                 )
 
-            # Execute the tool
+            # Call LLM
             try:
-                result = await _execute_tool(tool_name, tool_args, lms_client)
-                result_str = _format_tool_result(result)
-
+                response = await llm_client.chat(
+                    messages=messages,
+                    tools=tools,
+                    system_prompt=system_prompt,
+                )
+            except httpx.HTTPStatusError as e:
                 if debug:
                     print(
-                        f"[tool] Result: {result_str[:100]}{'...' if len(result_str) > 100 else ''}",
+                        f"[error] LLM HTTP error: {e.response.status_code}",
                         file=sys.stderr,
                     )
-
-                # Store result for feeding back to LLM
-                tool_results.append({
-                    "tool_call_id": tool_id,
-                    "result": result,
-                })
-
+                if e.response.status_code == 401:
+                    return "LLM authentication failed (HTTP 401). The API token may have expired."
+                return f"LLM error: HTTP {e.response.status_code}"
+            except httpx.ConnectError as e:
+                if debug:
+                    print(f"[error] LLM connection error: {e}", file=sys.stderr)
+                return "Cannot connect to LLM service. Please check that the LLM proxy is running."
             except Exception as e:
                 if debug:
+                    print(f"[error] LLM error: {e}", file=sys.stderr)
+                return f"LLM error: {str(e)}"
+
+            # Extract tool calls
+            tool_calls = llm_client.extract_tool_calls(response)
+
+            # If no tool calls, LLM has a final answer
+            if not tool_calls:
+                response_text = llm_client.get_response_text(response)
+                if debug and response_text:
                     print(
-                        f"[tool] Error executing {tool_name}: {e}",
+                        f"[response] LLM returned text response",
                         file=sys.stderr,
                     )
-                tool_results.append({
-                    "tool_call_id": tool_id,
-                    "result": {"error": str(e)},
-                })
+                return (
+                    response_text
+                    or "I'm not sure how to help with that. Try asking about labs, scores, or students."
+                )
 
-        # Feed tool results back to LLM
+            # Execute each tool call
+            for tool_call in tool_calls:
+                tool_name = tool_call["name"]
+                tool_args = tool_call["arguments"]
+                tool_id = tool_call["id"]
+
+                if debug:
+                    print(
+                        f"[tool] LLM called: {tool_name}({tool_args})",
+                        file=sys.stderr,
+                    )
+
+                # Execute the tool
+                try:
+                    result = await _execute_tool(tool_name, tool_args, lms_client)
+                    result_str = _format_tool_result(result)
+
+                    if debug:
+                        print(
+                            f"[tool] Result: {result_str[:100]}{'...' if len(result_str) > 100 else ''}",
+                            file=sys.stderr,
+                        )
+
+                    # Store result for feeding back to LLM
+                    tool_results.append(
+                        {
+                            "tool_call_id": tool_id,
+                            "result": result,
+                        }
+                    )
+
+                except Exception as e:
+                    if debug:
+                        print(
+                            f"[tool] Error executing {tool_name}: {e}",
+                            file=sys.stderr,
+                        )
+                    tool_results.append(
+                        {
+                            "tool_call_id": tool_id,
+                            "result": {"error": str(e)},
+                        }
+                    )
+
+            # Feed tool results back to LLM
+            if debug:
+                print(
+                    f"[summary] Feeding {len(tool_results)} tool result(s) back to LLM",
+                    file=sys.stderr,
+                )
+
+            # Build tool response messages
+            for tr in tool_results:
+                messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tr["tool_call_id"],
+                        "content": _format_tool_result(tr["result"]),
+                    }
+                )
+
+            # Clear tool results for next iteration
+            tool_results = []
+
+        # If we hit max iterations, return what we have
+        return "I'm having trouble processing your request. Please try rephrasing your question."
+
+    except Exception as e:
         if debug:
-            print(
-                f"[summary] Feeding {len(tool_results)} tool result(s) back to LLM",
-                file=sys.stderr,
-            )
+            print(f"[fatal] Unexpected error: {e}", file=sys.stderr)
+            import traceback
 
-        # Build tool response messages
-        for tr in tool_results:
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tr["tool_call_id"],
-                "content": _format_tool_result(tr["result"]),
-            })
-
-        # Clear tool results for next iteration
-        tool_results = []
-
-    # If we hit max iterations, return what we have
-    return "I'm having trouble processing your request. Please try rephrasing your question."
+            traceback.print_exc(file=sys.stderr)
+        return f"Error processing request: {str(e)}"
 
 
 async def _execute_tool(

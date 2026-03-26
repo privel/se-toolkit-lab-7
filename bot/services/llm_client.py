@@ -45,6 +45,10 @@ class LLMClient:
 
         Returns:
             LLM response dict with choices containing message and/or tool_calls
+
+        Raises:
+            httpx.HTTPStatusError: If LLM API returns error status
+            httpx.ConnectError: If LLM API is unreachable
         """
         # Build messages list with system prompt first
         all_messages = []
@@ -61,7 +65,7 @@ class LLMClient:
             payload["tools"] = tools
             payload["tool_choice"] = "auto"
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.post(
                 f"{self.base_url}/chat/completions",
                 headers=self._headers,
@@ -94,11 +98,13 @@ class LLMClient:
             except json.JSONDecodeError:
                 arguments = {}
 
-            result.append({
-                "id": tc.get("id", ""),
-                "name": function.get("name", ""),
-                "arguments": arguments,
-            })
+            result.append(
+                {
+                    "id": tc.get("id", ""),
+                    "name": function.get("name", ""),
+                    "arguments": arguments,
+                }
+            )
 
         return result
 
