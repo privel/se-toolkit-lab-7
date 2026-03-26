@@ -128,8 +128,13 @@ async def handle_scores(lab_id: Optional[str] = None) -> str:
 
         result = [f"Pass rates for {lab_name}:"]
         for rate in pass_rates:
-            task_name = rate.get("task_name", rate.get("item_title", "Unknown"))
-            pass_rate = rate.get("pass_rate", rate.get("score", 0))
+            # API returns: task, avg_score, attempts
+            task_name = rate.get(
+                "task", rate.get("task_name", rate.get("item_title", "Unknown"))
+            )
+            pass_rate = rate.get(
+                "avg_score", rate.get("pass_rate", rate.get("score", 0))
+            )
             attempts = rate.get("attempts", 0)
             # Format as percentage
             percentage = (
